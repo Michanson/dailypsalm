@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily Psalm — A verse for every day</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:          #F0E9DC;
+      --surface:     #E3D8C8;
+      --surface2:    #D6C9B4;
+      --ink:         #16180F;
+      --ink-light:   #344028;
+      --ink-faint:   #6E7D5E;
+      --green:       #2D5A35;
+      --green-mid:   #4A7C52;
+      --green-light: #7FAF87;
+      --green-pale:  rgba(45,90,53,0.08);
+      --border:      rgba(45,90,53,0.18);
+      --gold:        #8A6A20;
+      --gold-pale:   rgba(138,106,32,0.1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Jost', sans-serif;
+      font-weight: 400;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 9999;
+    }
+
+    .glow { position: fixed; border-radius: 50%; pointer-events: none; z-index: 0; }
+    .glow1 { width: 700px; height: 700px; background: radial-gradient(circle, rgba(45,90,53,0.09), transparent 70%); top: -200px; right: -100px; }
+    .glow2 { width: 600px; height: 600px; background: radial-gradient(circle, rgba(45,90,53,0.06), transparent 70%); bottom: -200px; left: -200px; }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 22px 56px;
+      background: linear-gradient(to bottom, rgba(240,233,220,0.98) 70%, rgba(240,233,220,0));
+    }
+
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.35rem; font-weight: 600;
+      color: var(--ink); text-decoration: none; letter-spacing: 0.04em;
+    }
+    .nav-logo span { color: var(--green); }
+
+    .nav-links { display: flex; gap: 32px; list-style: none; align-items: center; }
+    .nav-links a {
+      font-size: 0.78rem; font-weight: 500; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--ink-light);
+      text-decoration: none; transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--green); }
+
+    .nav-subscribe {
+      background: var(--green) !important; color: #fff !important;
+      padding: 8px 20px; border-radius: 2px; letter-spacing: 0.1em !important;
+      transition: background 0.2s, transform 0.15s !important;
+    }
+    .nav-subscribe:hover { background: var(--green-mid) !important; transform: translateY(-1px); }
+
+    /* ── GREETING BAR ── */
+    .greeting-bar {
+      position: relative; z-index: 1;
+      text-align: center;
+      padding: 148px 40px 0;
+    }
+
+    .greeting {
+      font-size: 0.8rem; font-weight: 500;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--ink-faint);
+      animation: fadeUp 0.6s ease both;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: 32px 40px 60px;
+      position: relative; z-index: 1;
+      min-height: calc(100vh - 148px);
+    }
+
+    .date-line {
+      display: inline-flex; align-items: center; gap: 12px;
+      margin-bottom: 44px;
+      animation: fadeUp 0.7s 0.05s ease both;
+    }
+    .date-text {
+      font-size: 0.72rem; font-weight: 500;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--green-mid);
+    }
+    .date-line::before, .date-line::after {
+      content: ''; width: 40px; height: 1px;
+      background: var(--green-light); opacity: 0.6;
+    }
+
+    .psalm-ref {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1rem; font-weight: 400;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--ink-faint); margin-bottom: 24px;
+      animation: fadeUp 0.7s 0.1s ease both;
+    }
+
+    .hero-verse {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 5.2vw, 4rem);
+      font-weight: 300; font-style: italic;
+      line-height: 1.38; max-width: 800px;
+      color: var(--ink); margin-bottom: 28px;
+      position: relative;
+      animation: fadeUp 0.8s 0.15s ease both;
+    }
+    .hero-verse::before {
+      content: '\201C';
+      position: absolute; top: -0.25em; left: -0.2em;
+      font-size: 5.5em; color: var(--gold);
+      opacity: 0.13; font-style: normal; line-height: 1;
+      pointer-events: none;
+    }
+
+    .hero-attribution {
+      font-size: 0.8rem; font-weight: 500;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--ink-faint); margin-bottom: 48px;
+      animation: fadeUp 0.7s 0.2s ease both;
+    }
+
+    /* ── RITUAL ACTIONS ── */
+    .ritual-actions {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 16px;
+      animation: fadeUp 0.7s 0.25s ease both;
+      margin-bottom: 52px;
+    }
+
+    .action-row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+
+    .btn {
+      font-family: 'Jost', sans-serif;
+      font-size: 0.77rem; font-weight: 500;
+      letter-spacing: 0.13em; text-transform: uppercase;
+      padding: 12px 28px; text-decoration: none;
+      transition: all 0.2s; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-primary {
+      background: var(--green); color: #fff;
+      border: 1px solid var(--green);
+    }
+    .btn-primary:hover { background: var(--green-mid); }
+
+    .btn-ghost {
+      background: transparent; color: var(--ink-light);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { border-color: var(--green-mid); color: var(--green-mid); }
+
+    /* copy verse button — special */
+    .btn-copy {
+      background: var(--surface); color: var(--ink-light);
+      border: 1px solid var(--border); position: relative;
+    }
+    .btn-copy:hover { border-color: var(--green-light); color: var(--green-mid); }
+    .btn-copy.copied { color: var(--green); border-color: var(--green-light); background: var(--green-pale); }
+
+    .yesterday-link {
+      font-size: 0.72rem; font-weight: 500;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--ink-faint); text-decoration: none;
+      display: inline-flex; align-items: center; gap: 6px;
+      transition: color 0.2s;
+      border-bottom: 1px dashed rgba(143,160,144,0.4);
+      padding-bottom: 1px;
+    }
+    .yesterday-link:hover { color: var(--green-mid); border-bottom-color: var(--green-light); }
+
+    /* scroll cue */
+    .scroll-cue {
+      position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      font-size: 0.66rem; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--ink-faint); animation: fadeUp 1s 0.5s ease both;
+    }
+    .scroll-line {
+      width: 1px; height: 36px;
+      background: linear-gradient(to bottom, var(--green-light), transparent);
+      animation: scrollPulse 2.2s ease-in-out infinite;
+    }
+
+    /* ── ORNAMENT ── */
+    .ornament {
+      text-align: center; padding: 8px 0;
+      color: var(--gold); font-size: 0.9rem;
+      letter-spacing: 1em; opacity: 0.55;
+      position: relative; z-index: 1;
+    }
+
+    /* ── FULL PSALM ── */
+    .psalm-section {
+      padding: 72px 40px 80px;
+      max-width: 680px; margin: 0 auto;
+      position: relative; z-index: 1;
+    }
+
+    .psalm-header {
+      text-align: center; margin-bottom: 52px;
+      padding-bottom: 36px; border-bottom: 1px solid var(--border);
+    }
+    .psalm-header-label {
+      font-size: 0.68rem; font-weight: 500;
+      letter-spacing: 0.24em; text-transform: uppercase;
+      color: var(--green-mid); margin-bottom: 10px;
+    }
+    .psalm-header h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 300;
+      color: var(--ink); margin-bottom: 10px;
+    }
+    .psalm-header .subtitle {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic; font-size: 1.05rem;
+      color: var(--ink-faint);
+    }
+
+    .psalm-body { counter-reset: verse; }
+
+    .verse {
+      display: grid; grid-template-columns: 24px 1fr;
+      gap: 0 18px; margin-bottom: 26px; align-items: baseline;
+    }
+    .verse-num {
+      font-size: 0.65rem; font-weight: 600;
+      letter-spacing: 0.06em; color: var(--green-light);
+      padding-top: 5px; text-align: right;
+    }
+    .verse-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.1rem, 2vw, 1.32rem);
+      font-weight: 300; line-height: 1.82; color: var(--ink);
+    }
+    .verse-text em { font-style: italic; color: var(--green-mid); }
+
+    /* highlighted verse — today's key verse */
+    .verse.highlight .verse-text {
+      color: var(--green);
+      font-weight: 400;
+    }
+    .verse.highlight .verse-num { color: var(--green-mid); }
+
+    .selah {
+      display: block; text-align: right;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic; font-size: 0.88rem;
+      color: var(--ink-faint);
+      margin-top: -14px; margin-bottom: 30px;
+      letter-spacing: 0.14em;
+    }
+
+    /* ── REFLECTION ── */
+    .reflection {
+      margin-top: 60px; padding: 40px 44px;
+      background: #FDFAF3;
+      border: 1px solid rgba(138,106,32,0.2);
+      border-radius: 2px;
+      position: relative; overflow: hidden;
+    }
+    .reflection::before {
+      content: '';
+      position: absolute; top: 0; left: 0;
+      width: 3px; height: 100%;
+      background: linear-gradient(to bottom, var(--gold), var(--green-light));
+    }
+
+    /* handwritten-note feel for reflection */
+    .reflection-eyebrow {
+      font-size: 0.65rem; font-weight: 600;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--green-mid); margin-bottom: 14px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .reflection-eyebrow::after {
+      content: ''; flex: 1; height: 1px;
+      background: var(--border);
+    }
+
+    .reflection h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.45rem; font-weight: 400; font-style: italic;
+      color: var(--ink); margin-bottom: 14px; line-height: 1.4;
+    }
+    .reflection p {
+      font-size: 0.92rem; line-height: 1.9;
+      color: var(--ink-light);
+    }
+    .reflection p + p { margin-top: 12px; }
+
+    /* sitting with it prompt */
+    .sit-with-it {
+      margin-top: 24px; padding-top: 20px;
+      border-top: 1px dashed rgba(45,90,53,0.15);
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic; font-size: 1rem;
+      color: var(--ink-faint); line-height: 1.7;
+    }
+    .sit-with-it strong {
+      font-style: normal; font-weight: 600;
+      font-size: 0.68rem; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--gold);
+      display: block; margin-bottom: 6px;
+      font-family: 'Jost', sans-serif;
+    }
+
+    /* ── YESTERDAY + NEXT NAVIGATION ── */
+    .psalm-nav {
+      display: flex; justify-content: space-between;
+      align-items: center; margin-top: 56px;
+      padding-top: 32px; border-top: 1px solid var(--border);
+    }
+    .psalm-nav-link {
+      display: flex; flex-direction: column; gap: 4px;
+      text-decoration: none; max-width: 200px;
+      transition: opacity 0.2s;
+    }
+    .psalm-nav-link:hover { opacity: 0.7; }
+    .pnl-direction {
+      font-size: 0.65rem; font-weight: 600;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--ink-faint);
+      display: flex; align-items: center; gap: 5px;
+    }
+    .pnl-ref {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1rem; font-style: italic; color: var(--ink-light);
+    }
+    .psalm-nav-link.next { text-align: right; }
+    .psalm-nav-center {
+      font-size: 0.7rem; font-weight: 500;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--ink-faint); text-decoration: none;
+      transition: color 0.2s;
+    }
+    .psalm-nav-center:hover { color: var(--green-mid); }
+
+    /* ── RECENT STRIP ── */
+    .recent {
+      padding: 72px 40px 80px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      position: relative; z-index: 1;
+    }
+    .recent-inner { max-width: 680px; margin: 0 auto; }
+
+    .section-label {
+      font-size: 0.68rem; font-weight: 600;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--green-mid); margin-bottom: 8px;
+    }
+    .section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      font-weight: 300; color: var(--ink);
+      margin-bottom: 36px;
+    }
+
+    .recent-list { display: flex; flex-direction: column; gap: 2px; }
+
+    .recent-item {
+      display: grid; grid-template-columns: 1fr auto;
+      align-items: center;
+      padding: 18px 20px;
+      background: #FDFAF3; border: 1px solid var(--border);
+      text-decoration: none;
+      transition: border-color 0.2s, background 0.2s;
+      gap: 16px;
+    }
+    .recent-item:first-child { border-radius: 3px 3px 0 0; }
+    .recent-item:last-child  { border-radius: 0 0 3px 3px; }
+    .recent-item + .recent-item { border-top: none; }
+    .recent-item:hover { border-color: var(--green-light); background: var(--bg); }
+
+    .ri-left { display: flex; flex-direction: column; gap: 3px; }
+    .ri-ref {
+      font-size: 0.68rem; font-weight: 600;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--green-mid);
+    }
+    .ri-preview {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic; font-size: 1rem;
+      color: var(--ink-light); line-height: 1.5;
+    }
+    .ri-date {
+      font-size: 0.7rem; color: var(--ink-faint);
+      white-space: nowrap; letter-spacing: 0.06em;
+    }
+
+    /* ── SUBSCRIBE ── */
+    .subscribe {
+      padding: 80px 40px;
+      position: relative; z-index: 1;
+      text-align: center;
+    }
+    .subscribe-inner {
+      max-width: 480px; margin: 0 auto;
+    }
+    .subscribe-ornament {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem; color: var(--green-light);
+      opacity: 0.5; margin-bottom: 20px; letter-spacing: 0.3em;
+    }
+    .subscribe h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+      font-weight: 300; color: var(--ink);
+      margin-bottom: 12px; line-height: 1.35;
+    }
+    .subscribe p {
+      font-size: 0.9rem; line-height: 1.8;
+      color: var(--ink-light); margin-bottom: 32px;
+    }
+    .sub-form { display: flex; }
+    .sub-input {
+      flex: 1; padding: 13px 18px;
+      font-family: 'Jost', sans-serif; font-size: 0.88rem;
+      border: 1px solid var(--border); border-right: none;
+      background: white; color: var(--ink); outline: none;
+      border-radius: 2px 0 0 2px; transition: border-color 0.2s;
+    }
+    .sub-input:focus { border-color: var(--green-mid); }
+    .sub-input::placeholder { color: var(--ink-faint); }
+    .sub-btn {
+      padding: 13px 24px; background: var(--green); color: #fff;
+      border: 1px solid var(--green);
+      font-family: 'Jost', sans-serif; font-size: 0.72rem; font-weight: 600;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      cursor: pointer; border-radius: 0 2px 2px 0;
+      transition: background 0.2s; white-space: nowrap;
+    }
+    .sub-btn:hover { background: var(--green-mid); }
+    .sub-note {
+      font-size: 0.72rem; color: var(--ink-faint);
+      margin-top: 14px; letter-spacing: 0.06em;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 32px 56px;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 16px;
+      position: relative; z-index: 1;
+    }
+    .footer-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.15rem; font-weight: 600;
+      color: var(--ink); text-decoration: none;
+    }
+    .footer-logo span { color: var(--green); }
+    .footer-links { display: flex; gap: 24px; list-style: none; }
+    .footer-links a {
+      font-size: 0.72rem; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--ink-faint); text-decoration: none; transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--green-mid); }
+    .footer-copy { font-size: 0.72rem; color: var(--ink-faint); letter-spacing: 0.05em; }
+
+    .footer-support {
+      font-size: 0.78rem; color: var(--ink-faint);
+      font-style: italic;
+    }
+    .footer-support a {
+      color: var(--gold); text-decoration: none;
+      border-bottom: 1px solid rgba(138,106,32,0.3);
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .footer-support a:hover { color: var(--green-mid); border-color: var(--green-light); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes scrollPulse {
+      0%, 100% { opacity: 0.25; }
+      50%       { opacity: 0.8; }
+    }
+
+    /* ── MOBILE FIRST ── */
+    @media (max-width: 680px) {
+      nav { padding: 18px 20px; }
+      .nav-links { display: none; }
+      .greeting-bar { padding-top: 90px; }
+      .hero { padding: 24px 24px 56px; min-height: auto; }
+      .hero-verse { font-size: clamp(1.8rem, 8vw, 2.8rem); }
+      .hero-verse::before { display: none; }
+      .psalm-section { padding: 56px 20px 60px; }
+      .reflection { padding: 28px 24px; }
+      .recent { padding: 56px 20px 60px; }
+      .subscribe { padding: 60px 20px; }
+      footer { flex-direction: column; align-items: center; text-align: center; padding: 28px 20px; }
+      .psalm-nav { flex-direction: column; gap: 20px; text-align: center; }
+      .psalm-nav-link.next { text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="glow glow1"></div>
+  <div class="glow glow2"></div>
+
+  <!-- NAV -->
+  <nav>
+    <a class="nav-logo" href="#">Daily<span>Psalm</span></a>
+    <ul class="nav-links">
+      <li><a href="#">Today's Psalm</a></li>
+      <li><a href="#recent">Recent</a></li>
+      <li><a href="#">About</a></li>
+      <li><a href="#subscribe" class="nav-subscribe">Subscribe</a></li>
+    </ul>
+  </nav>
+
+  <!-- GREETING -->
+  <div class="greeting-bar">
+    <p class="greeting" id="greeting">Good morning</p>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="date-line">
+      <span class="date-text">Tuesday, March 10, 2026</span>
+    </div>
+
+    <p class="psalm-ref">Psalm 46 &nbsp;·&nbsp; Verse 10</p>
+
+    <blockquote class="hero-verse">
+      Be still, and know that I am God;<br>
+      I will be exalted among the nations,<br>
+      I will be exalted in the earth.
+    </blockquote>
+
+    <p class="hero-attribution">English Standard Version</p>
+
+    <div class="ritual-actions">
+      <div class="action-row">
+        <a href="#psalm" class="btn btn-primary">Read Full Psalm</a>
+        <button class="btn btn-copy" id="copyBtn" onclick="copyVerse()">
+          <span id="copyLabel">Copy Verse</span>
+        </button>
+      </div>
+      <a href="#" class="yesterday-link">← Yesterday · Psalm 23</a>
+    </div>
+
+    <div class="scroll-cue">
+      <div class="scroll-line"></div>
+      <span>Continue</span>
+    </div>
+  </section>
+
+  <div class="ornament">✦ &nbsp; ✦ &nbsp; ✦</div>
+
+  <!-- FULL PSALM -->
+  <section class="psalm-section" id="psalm">
+    <div class="psalm-header">
+      <p class="psalm-header-label">Today's Reading</p>
+      <h2>Psalm 46</h2>
+      <p class="subtitle">God Is Our Fortress</p>
+    </div>
+
+    <div class="psalm-body">
+      <div class="verse">
+        <span class="verse-num">1</span>
+        <span class="verse-text">God is our refuge and strength, a very present help in trouble.</span>
+      </div>
+      <div class="verse">
+        <span class="verse-num">2</span>
+        <span class="verse-text">Therefore we will not fear though the earth gives way, though the mountains be moved into the heart of the sea,</span>
+      </div>
+      <div class="verse">
+        <span class="verse-num">3</span>
+        <span class="verse-text">though its waters roar and foam, though the mountains tremble at its swelling.</span>
+      </div>
+      <span class="selah">Selah</span>
+      <div class="verse">
+        <span class="verse-num">4</span>
+        <span class="verse-text">There is a river whose streams make glad the city of God, the holy habitation of the Most High.</span>
+      </div>
+      <div class="verse">
+        <span class="verse-num">5</span>
+        <span class="verse-text">God is in the midst of her; she shall not be moved; God will help her when morning dawns.</span>
+      </div>
+      <div class="verse">
+        <span class="verse-num">6</span>
+        <span class="verse-text">The nations rage, the kingdoms totter; he utters his voice, the earth melts.</span>
+      </div>
+      <div class="verse">
+        <span class="verse-num">7</span>
+        <span class="verse-text">The <em>Lord</em> of hosts is with us; the God of Jacob is our fortress.</span>
+      </div>
+      <span class="selah">Selah</span>
+      <div class="verse">
+        <span class="verse-num">8</span>
+        <span class="verse-text">Come, behold the works of the <em>Lord</em>, how he has brought desolations on the earth.</span>
+      </div>
+      <div class="verse">
+        <span class="verse-num">9</span>
+        <span class="verse-text">He makes wars cease to the end of the earth; he breaks the bow and shatters the spear; he burns the chariots with fire.</span>
+      </div>
+      <div class="verse highlight">
+        <span class="verse-num">10</span>
+        <span class="verse-text">"Be still, and know that I am God. I will be exalted among the nations, I will be exalted in the earth!"</span>
+      </div>
+      <div class="verse">
+        <span class="verse-num">11</span>
+        <span class="verse-text">The <em>Lord</em> of hosts is with us; the God of Jacob is our fortress.</span>
+      </div>
+      <span class="selah">Selah</span>
+    </div>
+
+    <!-- REFLECTION -->
+    <div class="reflection">
+      <p class="reflection-eyebrow">A thought for today</p>
+      <h3>Finding stillness in the noise</h3>
+      <p>In a world that rarely pauses, this psalm offers an invitation — not a command to do nothing, but a call to release the grip of anxiety and trust. The Hebrew word for "still" here, <em>raphah</em>, suggests letting go, relaxing the hands.</p>
+      <p>Whatever you're carrying today, there is room to set it down, even briefly, and remember who holds it all.</p>
+      <div class="sit-with-it">
+        <strong>Sit with this</strong>
+        Where in your day today might you find a single quiet minute — not to fix anything, just to be still?
+      </div>
+    </div>
+
+    <!-- PSALM NAVIGATION -->
+    <div class="psalm-nav">
+      <a href="#" class="psalm-nav-link">
+        <span class="pnl-direction">← Yesterday</span>
+        <span class="pnl-ref">Psalm 23</span>
+      </a>
+      <a href="#" class="psalm-nav-center">All Recent</a>
+      <a href="#" class="psalm-nav-link next">
+        <span class="pnl-direction" style="justify-content:flex-end;">Tomorrow →</span>
+        <span class="pnl-ref">Psalm 103</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- RECENT PSALMS -->
+  <section class="recent" id="recent">
+    <div class="recent-inner">
+      <p class="section-label">✦ Recent Readings</p>
+      <h2 class="section-title">If you missed a day</h2>
+      <div class="recent-list">
+        <a href="#" class="recent-item">
+          <div class="ri-left">
+            <span class="ri-ref">Psalm 23 · March 9</span>
+            <span class="ri-preview">"The Lord is my shepherd; I shall not want…"</span>
+          </div>
+          <span class="ri-date">Yesterday</span>
+        </a>
+        <a href="#" class="recent-item">
+          <div class="ri-left">
+            <span class="ri-ref">Psalm 91 · March 8</span>
+            <span class="ri-preview">"He who dwells in the shelter of the Most High…"</span>
+          </div>
+          <span class="ri-date">2 days ago</span>
+        </a>
+        <a href="#" class="recent-item">
+          <div class="ri-left">
+            <span class="ri-ref">Psalm 121 · March 7</span>
+            <span class="ri-preview">"I lift up my eyes to the hills. From where does my help come…"</span>
+          </div>
+          <span class="ri-date">3 days ago</span>
+        </a>
+        <a href="#" class="recent-item">
+          <div class="ri-left">
+            <span class="ri-ref">Psalm 27 · March 6</span>
+            <span class="ri-preview">"The Lord is my light and my salvation; whom shall I fear…"</span>
+          </div>
+          <span class="ri-date">4 days ago</span>
+        </a>
+        <a href="#" class="recent-item">
+          <div class="ri-left">
+            <span class="ri-ref">Psalm 139 · March 5</span>
+            <span class="ri-preview">"O Lord, you have searched me and known me…"</span>
+          </div>
+          <span class="ri-date">5 days ago</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUBSCRIBE -->
+  <section class="subscribe" id="subscribe">
+    <div class="subscribe-inner">
+      <p class="subscribe-ornament">✦</p>
+      <h2>Begin each morning<br>with a psalm</h2>
+      <p>Delivered quietly to your inbox before the day begins. No noise, no extras — just the word.</p>
+      <div class="sub-form">
+        <input class="sub-input" type="email" placeholder="your@email.com" />
+        <button class="sub-btn">Subscribe</button>
+      </div>
+      <p class="sub-note">Free · No spam · Unsubscribe anytime</p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <a class="footer-logo" href="#">Daily<span>Psalm</span></a>
+    <ul class="footer-links">
+      <li><a href="#">About</a></li>
+      <li><a href="#">Archive</a></li>
+      <li><a href="#">Privacy</a></li>
+      <li><a href="#">Contact</a></li>
+    </ul>
+    <p class="footer-support">This site is free, always. If it's been good to you — <a href="https://ko-fi.com" target="_blank">buy us a coffee ↗</a></p>
+    <p class="footer-copy">© 2026 DailyPsalm.com</p>
+  </footer>
+
+  <script>
+    // ── GREETING by time of day ──
+    const hour = new Date().getHours();
+    const greetings = {
+      morning:   'Good morning',
+      afternoon: 'Good afternoon',
+      evening:   'Good evening',
+      night:     'A quiet moment for you'
+    };
+    const which = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : hour < 21 ? 'evening' : 'night';
+    document.getElementById('greeting').textContent = greetings[which];
+
+    // ── COPY VERSE ──
+    function copyVerse() {
+      const verse = `"Be still, and know that I am God; I will be exalted among the nations, I will be exalted in the earth." — Psalm 46:10 (ESV)`;
+      navigator.clipboard.writeText(verse).then(() => {
+        const btn = document.getElementById('copyBtn');
+        const lbl = document.getElementById('copyLabel');
+        btn.classList.add('copied');
+        lbl.textContent = 'Copied ✓';
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          lbl.textContent = 'Copy Verse';
+        }, 2200);
+      });
+    }
+  </script>
+
+</body>
+</html>
